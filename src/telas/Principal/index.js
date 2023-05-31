@@ -24,6 +24,7 @@ export default function Principal({ navigation }) {
                         titulo={item.titulo}  
                         fonte={item.fonte} 
                         descricao={item.descricao} 
+                        imagem={item.imagemUrl}
                         acao={() => navigation.navigate("Post", { item })}
                     />
                 ))}
