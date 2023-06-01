@@ -6,12 +6,17 @@ import { entradas } from "./entradas";
 import { alteraDados } from "../../utils/comum";
 import { IconeClicavel } from "../../componentes/IconeClicavel";
 import { salvarImagem } from "../../servicos/storage";
+import * as ImagePicker from 'expo-image-picker';
 
 const imagemGalaxia = 'https://img.freepik.com/fotos-gratis/fundo-de-galaxia-espacial_53876-93121.jpg?w=900&t=st=1685568881~exp=1685569481~hmac=9375f278421b19e7ca2260c74cb7e712c7dc0e21c45615e4db6cf761ad653c13'
+
+import uploadImagemPadrao from '../../assets/upload.jpeg';
 
 export default function Post({ navigation, route }) {
     const [desabilitarEnvio, setDesabilitarEnvio] = useState(false);
     const { item } = route?.params || {};
+
+    const [imagem, setImage] = useState(null);
 
     const [post, setPost] = useState({
         titulo: item?.titulo || "",
@@ -36,6 +41,20 @@ export default function Post({ navigation, route }) {
         }
     }
 
+    async function escolherImagemDaGaleria() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+          });
+
+          console.log(result);
+
+          if (!result.canceled) {
+            setImage(result.assets[0].uri);
+          }
+    }
 
     return (
         <View style={estilos.container}>
@@ -69,6 +88,16 @@ export default function Post({ navigation, route }) {
                         />
                     </View>
                 ))}
+
+                <TouchableOpacity 
+                    style={estilos.imagem}
+                    onPress={escolherImagemDaGaleria}>
+                    <Image
+                        source={imagem ? { uri: imagem} : uploadImagemPadrao}
+                        style={estilos.imagem}
+                    />
+                </TouchableOpacity>
+
             </ScrollView>
 
             <TouchableOpacity style={estilos.botao} onPress={salvar} disabled={desabilitarEnvio}>
