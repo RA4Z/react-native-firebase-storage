@@ -16,7 +16,7 @@ export default function Post({ navigation, route }) {
     const [desabilitarEnvio, setDesabilitarEnvio] = useState(false);
     const { item } = route?.params || {};
 
-    const [imagem, setImage] = useState(null);
+    const [imagem, setImage] = useState(item?.imagemUrl || null);
 
     const [post, setPost] = useState({
         titulo: item?.titulo || "",
@@ -29,17 +29,29 @@ export default function Post({ navigation, route }) {
         setDesabilitarEnvio(true);
 
         if (item) {
-            await atualizarPost(item.id, post);
+            await verificarAlteracaoPost();
             return navigation.goBack()  
         } 
         const idPost = await salvarPost({...post, imagemUrl: ''});
         navigation.goBack()  
         if(imagem != null) {
-            const url = await salvarImagem(imagem, idPost)
-            await atualizarPost(idPost, {
-                imagemUrl: url
-            });
+            atualizarPostComImagem(idPost)
         }
+    }
+
+    async function verificarAlteracaoPost() {
+        if(post.imagemUrl != imagem) {
+            atualizarPostComImagem(item.id)
+        } else {
+            atualizarPost(item.id, post)
+        }
+    }
+
+    async function atualizarPostComImagem(idPost) {
+        const url = await salvarImagem(imagem, idPost)
+        await atualizarPost(idPost, {
+            imagemUrl: url
+        });
     }
 
     async function escolherImagemDaGaleria() {
