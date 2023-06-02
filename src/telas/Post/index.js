@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, LogBox } from "react-native";
 import { salvarPost, atualizarPost, deletarPost } from "../../servicos/firestore";
 import estilos from "./estilos";
 import { entradas } from "./entradas";
@@ -8,9 +8,7 @@ import { IconeClicavel } from "../../componentes/IconeClicavel";
 import { salvarImagem, deletarImagem } from "../../servicos/storage";
 import * as ImagePicker from 'expo-image-picker';
 import { MenuSelecaoInferior } from "../../componentes/MenuSelecaoInferior";
-
-const imagemGalaxia = 'https://img.freepik.com/fotos-gratis/fundo-de-galaxia-espacial_53876-93121.jpg?w=900&t=st=1685568881~exp=1685569481~hmac=9375f278421b19e7ca2260c74cb7e712c7dc0e21c45615e4db6cf761ad653c13'
-
+LogBox.ignoreAllLogs()
 import uploadImagemPadrao from '../../assets/upload.jpeg';
 
 export default function Post({ navigation, route }) {
@@ -73,10 +71,19 @@ export default function Post({ navigation, route }) {
 
     async function removerImagemPost(){
         if(!item) return
-        if(deletarImagem(item.id)) {
+        if(await deletarImagem(item.id)) {
             await atualizarPost(item.id, {imagemUrl: null})
             navigation.goBack()
         }
+    }
+
+    async function excluirPostCompleto() {
+        if (!item) return
+        deletarPost(item.id);
+        if(item.imagemUrl != null) {
+            deletarImagem(item.id)
+        }
+        navigation.goBack();
     }
 
     return (
@@ -85,7 +92,7 @@ export default function Post({ navigation, route }) {
                 <Text style={estilos.titulo}>{item ? "Editar post" : "Novo Post"}</Text>
                 <IconeClicavel 
                     exibir={!!item} 
-                    onPress={() => {deletarPost(item.id); navigation.goBack()}}
+                    onPress={excluirPostCompleto}
                     iconeNome="trash-2" 
                 />
             </View>
